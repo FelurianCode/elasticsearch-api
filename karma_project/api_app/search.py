@@ -22,13 +22,14 @@ def bulk_json_data(json_data, _index, doc_type):
             yield {
                 "_index": _index,
                 "_type": doc_type,
+                "_fielddata": True,
                 "_id": uuid.uuid4(),
                 "_source": doc
             }
 
 
 def bulk_indexing(request):
-	json_tweets = db.tweets.find().limit(1000)
+	json_tweets = db.tweets.find()
 	result_list = []
 	for x in json_tweets:
 		result_dic = {}
@@ -46,7 +47,8 @@ def bulk_indexing(request):
 		result_dic['imagenes'] = x['imagenes']
 		result_dic['urls'] = x['urls']
 		result_dic['menciones'] = x['menciones']
-		result_dic['interpretaciones'] = x['interpretaciones']
+		if 'interpretaciones' in x:
+			result_dic['interpretaciones'] = x['interpretaciones']
 
 		result_list.append(result_dic)
 	
@@ -59,12 +61,14 @@ def bulk_indexing(request):
 		return JsonResponse({'error': e}, status=400)
 
 def search_by_date(request):
-    s = Search(using=es).sort('postedTime',{'order': "desc"})
-    response = s.execute()
-    return response
+	s = Search(using=es).sort('-postedTime.keyword')
+	response = s.execute()
+
+	return JsonResponse({'response': response.to_dict()}, status=200)
 
 def search_by_user(request):
-	user = request.POST['user']
-	s = Search(using=es).query("match", usuario=user)
+	user = request.GET['user']
+	q = Q("match", usuario__preferredUsername=user)
+	s = Search(using=es).query("nested", path="usuario", query = q)
 	response = s[:10].execute()
 	return response    
