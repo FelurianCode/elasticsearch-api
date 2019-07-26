@@ -68,7 +68,6 @@ def search_by_date(request):
 
 def search_by_user(request):
 	user = request.GET['user']
-	q = Q("match", usuario__preferredUsername=user)
-	s = Search(using=es).query("nested", path="usuario", query = q)
-	response = s[:10].execute()
-	return response    
+	s = Search(using=es).query("match", tweetId=user)
+	response = s.execute()
+	return JsonResponse({'response': response.to_dict()}, status=200)  
