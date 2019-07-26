@@ -44,6 +44,6 @@ python3 manage.py runserver
 ```
 GET   http:/{YOUR_URL}/api/elastic/       -->   Bulks mongo data to elasticsearch
 GET   http:/{YOUR_URL}/api/tweets-date/   -->   Gets tweets ordered by date
-POST   http:/{YOUR_URL}/api/tweets-user/   -->   Gets tweets by users   
+GET   http:/{YOUR_URL}/api/tweets-user/?user={preferredUsername}   -->   Gets tweets by users   
 ```
 
